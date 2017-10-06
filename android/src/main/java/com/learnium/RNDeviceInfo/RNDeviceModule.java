@@ -179,6 +179,17 @@ public class RNDeviceModule extends ReactContextBaseJavaModule implements Lifecy
     return config.screenHeightDp;
   }
 
+  @ReactMethod
+  public void listenToFontSizeChange() {
+    WritableMap fontParams = Arguments.createMap();
+    double fontScale = getReactApplicationContext().getResources().getConfiguration().fontScale;
+    if (fontScale < 1) fontParams.putInt("fontScale", -2);
+    else if (fontScale == 1) fontParams.putInt("fontScale", 0);
+    else fontParams.putInt("fontScale", 6);
+    fontParams.putBoolean("initial", true);
+    this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("FontSizeChanged", fontParams);
+  }
+
   @Override
   public @Nullable Map<String, Object> getConstants() {
     HashMap<String, Object> constants = new HashMap<String, Object>();

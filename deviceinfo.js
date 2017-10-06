@@ -102,5 +102,9 @@ module.exports = {
   },
   onTraitCollectionChange: function(listener: Function) {
     DeviceInfoEvent.addListener("TraitCollectionChanged", listener);
+  },
+  onFontSizeChange: function(listener: Function) {
+    RNDeviceInfo.listenToFontSizeChange();
+    DeviceInfoEvent.addListener("FontSizeChanged", listener);
   }
 };

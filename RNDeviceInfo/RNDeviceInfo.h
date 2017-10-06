@@ -19,6 +19,7 @@
 
 @interface RNDeviceInfo : RCTEventEmitter <RCTBridgeModule>
 
++ (void)listenToFontSizeChange;
 + (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator;
 + (void)willTransitionToTraitCollection:(UITraitCollection *)newCollection withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator;
 

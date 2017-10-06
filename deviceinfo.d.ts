@@ -25,3 +25,4 @@ export function getFirstInstallTime(): number;
 export function getLastUpdateTime(): number;
 export function getInitialWidth(): number;
 export function getInitialHeight(): number;
+export function getInitialFontScale(): number;

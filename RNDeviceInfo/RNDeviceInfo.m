@@ -24,7 +24,7 @@
 RCT_EXPORT_MODULE()
 
 - (NSArray<NSString *> *)supportedEvents {
-	  return @[@"ScreenSizeChanged", @"TraitCollectionChanged"];
+	  return @[@"ScreenSizeChanged", @"TraitCollectionChanged", @"FontSizeChanged"];
 }
 
 - (dispatch_queue_t)methodQueue
@@ -229,7 +229,7 @@ RCT_EXPORT_MODULE()
              @"isEmulator": @(self.isEmulator),
              @"isTablet": @(self.isTablet),
              @"width": @(self.width),
-             @"height": @(self.height),
+             @"height": @(self.height)
              };
 }
 
@@ -238,6 +238,33 @@ RCT_EXPORT_METHOD(isPinOrFingerprintSet:(RCTResponseSenderBlock)callback)
     LAContext *context = [[LAContext alloc] init];
     BOOL isPinOrFingerprintSet = ([context canEvaluatePolicy:LAPolicyDeviceOwnerAuthentication error:nil]);
     callback(@[[NSNumber numberWithBool:isPinOrFingerprintSet]]);
+}
+
+RCT_EXPORT_METHOD(listenToFontSizeChange)
+{
+    int fontScale = 1;
+
+    NSString *contentSize = [UIApplication sharedApplication].preferredContentSizeCategory;
+
+    if ([contentSize isEqual: @"UICTContentSizeCategoryXS"]) fontScale = -3;
+    else if ([contentSize isEqual: @"UICTContentSizeCategoryS"]) fontScale = -2;
+    else if ([contentSize isEqual: @"UICTContentSizeCategoryM"]) fontScale = -1;
+    else if ([contentSize isEqual: @"UICTContentSizeCategoryL"]) fontScale = 0;
+    else if ([contentSize isEqual: @"UICTContentSizeCategoryXL"]) fontScale = 1;
+    else if ([contentSize isEqual: @"UICTContentSizeCategoryXXL"]) fontScale = 2;
+    else if ([contentSize isEqual: @"UICTContentSizeCategoryXXXL"]) fontScale = 3;
+    else if ([contentSize isEqual: @"UICTContentSizeCategoryAccessibilityM"]) fontScale = 4;
+    else if ([contentSize isEqual: @"UICTContentSizeCategoryAccessibilityL"]) fontScale = 5;
+    else if ([contentSize isEqual: @"UICTContentSizeCategoryAccessibilityXL"]) fontScale = 6;
+    else if ([contentSize isEqual: @"UICTContentSizeCategoryAccessibilityXXL"]) fontScale = 7;
+    else if ([contentSize isEqual: @"UICTContentSizeCategoryAccessibilityXXXL"]) fontScale = 8;
+
+    [self sendEventWithName:@"FontSizeChanged" body:@{@"fontScale": [NSNumber numberWithInt: fontScale], @"initial": [NSNumber numberWithBool: YES]}];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                          selector:@selector(handleFontSizeNotification:)
+                                          name: @"UIContentSizeCategoryDidChangeNotification"
+                                          object:nil];
 }
 
 - (void)startObserving {
@@ -271,6 +298,27 @@ RCT_EXPORT_METHOD(isPinOrFingerprintSet:(RCTResponseSenderBlock)callback)
                                           object:self 
                                           userInfo:@{@"isHorizantalRegular": [NSNumber numberWithBool: [newCollection containsTraitsInCollection: [UITraitCollection traitCollectionWithHorizontalSizeClass: UIUserInterfaceSizeClassRegular]]], 
                                                      @"isVerticalRegular": [NSNumber numberWithBool: [newCollection containsTraitsInCollection: [UITraitCollection traitCollectionWithVerticalSizeClass: UIUserInterfaceSizeClassRegular]]]}];
+}
+
+- (void)handleFontSizeNotification:(NSNotification *)notification {
+    int fontScale = 1;
+
+    NSString *contentSize = notification.userInfo[@"UIContentSizeCategoryNewValueKey"];
+
+    if ([contentSize isEqual: @"UICTContentSizeCategoryXS"]) fontScale = -3;
+    else if ([contentSize isEqual: @"UICTContentSizeCategoryS"]) fontScale = -2;
+    else if ([contentSize isEqual: @"UICTContentSizeCategoryM"]) fontScale = -1;
+    else if ([contentSize isEqual: @"UICTContentSizeCategoryL"]) fontScale = 0;
+    else if ([contentSize isEqual: @"UICTContentSizeCategoryXL"]) fontScale = 1;
+    else if ([contentSize isEqual: @"UICTContentSizeCategoryXXL"]) fontScale = 2;
+    else if ([contentSize isEqual: @"UICTContentSizeCategoryXXXL"]) fontScale = 3;
+    else if ([contentSize isEqual: @"UICTContentSizeCategoryAccessibilityM"]) fontScale = 4;
+    else if ([contentSize isEqual: @"UICTContentSizeCategoryAccessibilityL"]) fontScale = 5;
+    else if ([contentSize isEqual: @"UICTContentSizeCategoryAccessibilityXL"]) fontScale = 6;
+    else if ([contentSize isEqual: @"UICTContentSizeCategoryAccessibilityXXL"]) fontScale = 7;
+    else if ([contentSize isEqual: @"UICTContentSizeCategoryAccessibilityXXXL"]) fontScale = 8;
+
+    [self sendEventWithName:@"FontSizeChanged" body:@{@"fontScale": [NSNumber numberWithInt: fontScale], @"initial": [NSNumber numberWithBool: NO]}];
 }
 
 - (void)handleNotification:(NSNotification *)notification {
