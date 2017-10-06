@@ -11,10 +11,15 @@
 
 #if __has_include(<React/RCTAssert.h>)
 #import <React/RCTBridgeModule.h>
+#import <React/RCTEventEmitter.h>
 #else
 #import "RCTBridgeModule.h"
+#import "RCTEventEmitter.h"
 #endif
 
-@interface RNDeviceInfo : NSObject <RCTBridgeModule>
+@interface RNDeviceInfo : RCTEventEmitter <RCTBridgeModule>
+
++ (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator;
++ (void)willTransitionToTraitCollection:(UITraitCollection *)newCollection withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator;
 
 @end

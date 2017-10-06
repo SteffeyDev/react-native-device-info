@@ -14,6 +14,12 @@ import android.provider.Settings.Secure;
 import android.webkit.WebSettings;
 import android.telephony.TelephonyManager;
 import android.text.format.Formatter;
+import android.app.Activity;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.util.DisplayMetrics;
+import android.content.BroadcastReceiver;
+import android.util.Log;
 
 import com.google.android.gms.iid.InstanceID;
 
@@ -22,6 +28,12 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
+import com.facebook.react.bridge.LifecycleEventListener;
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.common.ReactConstants;
+import com.facebook.common.logging.FLog;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -30,20 +42,72 @@ import java.util.TimeZone;
 
 import javax.annotation.Nullable;
 
-public class RNDeviceModule extends ReactContextBaseJavaModule {
+public class RNDeviceModule extends ReactContextBaseJavaModule implements LifecycleEventListener {
 
   ReactApplicationContext reactContext;
 
   WifiInfo wifiInfo;
+
+  final BroadcastReceiver receiver;
 
   public RNDeviceModule(ReactApplicationContext reactContext) {
     super(reactContext);
 
     this.reactContext = reactContext;
 
+    final ReactApplicationContext ctx = reactContext;
+    receiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Configuration newConfig = intent.getParcelableExtra("newConfig");
+			Log.d("receiver", String.valueOf(newConfig.orientation));
+        
+			WritableMap dimParams = Arguments.createMap();
+			dimParams.putInt("width", newConfig.screenWidthDp);
+			dimParams.putInt("height", newConfig.screenHeightDp);
+			if (ctx.hasActiveCatalystInstance()) {
+			  ctx.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("ScreenSizeChanged", dimParams);
+			}
+		}
+    };
+    ctx.addLifecycleEventListener(this);
 
     WifiManager manager = (WifiManager) reactContext.getSystemService(Context.WIFI_SERVICE);
     this.wifiInfo = manager.getConnectionInfo();
+  }
+
+  @Override
+  public void onHostResume() {
+    final Activity activity = getCurrentActivity();
+
+    assert activity != null;
+    activity.registerReceiver(receiver, new IntentFilter("onConfigurationChanged"));
+  }
+
+  @Override
+  public void onHostPause() {
+    final Activity activity = getCurrentActivity();
+    if (activity == null) return;
+    try
+    {
+        activity.unregisterReceiver(receiver);
+    }
+    catch (java.lang.IllegalArgumentException e) {
+        FLog.e(ReactConstants.TAG, "receiver already unregistered", e);
+    }
+  }
+
+  @Override
+  public void onHostDestroy() {
+    final Activity activity = getCurrentActivity();
+    if (activity == null) return;
+    try
+    {
+        activity.unregisterReceiver(receiver);
+    }
+    catch (java.lang.IllegalArgumentException e) {
+        FLog.e(ReactConstants.TAG, "receiver already unregistered", e);
+    }
   }
 
   @Override
@@ -105,6 +169,16 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
     p.resolve(macAddress);
   }
 
+  private float width() {
+    Configuration config = getReactApplicationContext().getResources().getConfiguration();
+    return config.screenWidthDp;
+  }
+
+  private float height() {
+    Configuration config = getReactApplicationContext().getResources().getConfiguration();
+    return config.screenHeightDp;
+  }
+
   @Override
   public @Nullable Map<String, Object> getConstants() {
     HashMap<String, Object> constants = new HashMap<String, Object>();
@@ -157,6 +231,8 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
     constants.put("timezone", TimeZone.getDefault().getID());
     constants.put("isEmulator", this.isEmulator());
     constants.put("isTablet", this.isTablet());
+    constants.put("width", this.width());
+    constants.put("height", this.height());
     if (getCurrentActivity().checkCallingOrSelfPermission(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED ||
             getCurrentActivity().checkCallingOrSelfPermission(Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED ||
             getCurrentActivity().checkCallingOrSelfPermission("android.permission.READ_PHONE_NUMBERS") == PackageManager.PERMISSION_GRANTED) {

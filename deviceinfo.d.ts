@@ -23,3 +23,5 @@ export function isTablet(): boolean;
 export function isPinOrFingerprintSet(): (cb: (isPinOrFingerprintSet: boolean) => void) => void;
 export function getFirstInstallTime(): number;
 export function getLastUpdateTime(): number;
+export function getInitialWidth(): number;
+export function getInitialHeight(): number;

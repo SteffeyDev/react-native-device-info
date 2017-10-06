@@ -23,6 +23,10 @@
 
 RCT_EXPORT_MODULE()
 
+- (NSArray<NSString *> *)supportedEvents {
+	  return @[@"ScreenSizeChanged", @"TraitCollectionChanged"];
+}
+
 - (dispatch_queue_t)methodQueue
 {
     return dispatch_get_main_queue();
@@ -185,6 +189,20 @@ RCT_EXPORT_MODULE()
   return [[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad;
 }
 
+- (CGFloat) width
+{
+	  UIViewController *rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
+	    UIView *rootView = rootViewController.view;
+		  return rootView.frame.size.width;
+}
+
+- (CGFloat) height
+{
+	  UIViewController *rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
+	    UIView *rootView = rootViewController.view;
+		  return rootView.frame.size.height;
+}
+
 - (NSDictionary *)constantsToExport
 {
     UIDevice *currentDevice = [UIDevice currentDevice];
@@ -210,6 +228,8 @@ RCT_EXPORT_MODULE()
              @"timezone": self.timezone,
              @"isEmulator": @(self.isEmulator),
              @"isTablet": @(self.isTablet),
+             @"width": @(self.width),
+             @"height": @(self.height),
              };
 }
 
@@ -218,6 +238,43 @@ RCT_EXPORT_METHOD(isPinOrFingerprintSet:(RCTResponseSenderBlock)callback)
     LAContext *context = [[LAContext alloc] init];
     BOOL isPinOrFingerprintSet = ([context canEvaluatePolicy:LAPolicyDeviceOwnerAuthentication error:nil]);
     callback(@[[NSNumber numberWithBool:isPinOrFingerprintSet]]);
+}
+
+- (void)startObserving {
+    for (NSString *event in [self supportedEvents]) {
+       [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(handleNotification:)
+                                             name:event
+                                             object:nil];
+    }
+}
+
+- (void)stopObserving {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
++ (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"ScreenSizeChanged" 
+                                          object:self 
+                                          userInfo:@{@"width":  [NSNumber numberWithFloat: size.width], @"height": [NSNumber numberWithFloat: size.height]}];
+}
+
++ (void)willTransitionToTraitCollection:(UITraitCollection *)newCollection withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+    UIViewController *rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
+    UIView *rootView = rootViewController.view;
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"ScreenSizeChanged" 
+                                          object:self 
+                                          userInfo:@{@"width": [NSNumber numberWithFloat: rootView.bounds.size.width], 
+                                                     @"height": [NSNumber numberWithFloat: rootView.bounds.size.height]}];
+
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"TraitCollectionChanged" 
+                                          object:self 
+                                          userInfo:@{@"isHorizantalRegular": [NSNumber numberWithBool: [newCollection containsTraitsInCollection: [UITraitCollection traitCollectionWithHorizontalSizeClass: UIUserInterfaceSizeClassRegular]]], 
+                                                     @"isVerticalRegular": [NSNumber numberWithBool: [newCollection containsTraitsInCollection: [UITraitCollection traitCollectionWithVerticalSizeClass: UIUserInterfaceSizeClassRegular]]]}];
+}
+
+- (void)handleNotification:(NSNotification *)notification {
+    [self sendEventWithName:notification.name body:notification.userInfo];
 }
 
 @end

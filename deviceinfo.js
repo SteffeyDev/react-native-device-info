@@ -2,7 +2,12 @@
  * @providesModule react-native-device-info
  */
 
-var RNDeviceInfo = require('react-native').NativeModules.RNDeviceInfo;
+import {
+	NativeModules,
+	NativeEventEmitter
+} from 'react-native';
+const RNDeviceInfo = NativeModules.RNDeviceInfo;
+const DeviceInfoEvent = new NativeEventEmitter(RNDeviceInfo);
 
 module.exports = {
   getUniqueID: function () {
@@ -85,5 +90,17 @@ module.exports = {
   },
   getPhoneNumber: function () {
     return RNDeviceInfo.phoneNumber;
+  },
+  getInitialWidth: function() {
+    return RNDeviceInfo.width;
+  },
+  getInitialHeight: function() {
+    return RNDeviceInfo.height;
+  },
+  onSizeChange: function(listener: Function) {
+    DeviceInfoEvent.addListener("ScreenSizeChanged", listener);
+  },
+  onTraitCollectionChange: function(listener: Function) {
+    DeviceInfoEvent.addListener("TraitCollectionChanged", listener);
   }
 };
