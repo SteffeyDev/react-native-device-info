@@ -70,6 +70,11 @@ module.exports = {
   },
   getFontScale: function() {
     return RNDeviceInfo.fontScale;
+  getInitialWidth: function() {
+    return RNDeviceInfo.width;
+  },
+  getInitialHeight: function() {
+    return RNDeviceInfo.height;
   },
   isEmulator: function() {
     return RNDeviceInfo.isEmulator;

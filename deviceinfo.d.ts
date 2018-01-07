@@ -21,6 +21,8 @@ export function getInstanceID(): string;
 export function isEmulator(): boolean;
 export function isTablet(): boolean;
 export function getFontScale(): number;
+export function getInitialWidth(): number;
+export function getInitialHeight(): number;
 export function is24Hour(): boolean;
 export function isPinOrFingerprintSet(): (cb: (isPinOrFingerprintSet: boolean) => void) => void;
 export function getFirstInstallTime(): number;

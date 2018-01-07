@@ -215,6 +215,20 @@ RCT_EXPORT_MODULE(RNDeviceInfo)
   return [NSNumber numberWithFloat: fontScale];
 }
 
+- (CGFloat) width
+{
+  UIViewController *rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
+  UIView *rootView = rootViewController.view;
+  return rootView.frame.size.width;
+}
+
+- (CGFloat) height
+{
+  UIViewController *rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
+  UIView *rootView = rootViewController.view;
+  return rootView.frame.size.height;
+}
+
 - (bool) is24Hour
 {
     NSString *format = [NSDateFormatter dateFormatFromTemplate:@"j" options:0 locale:[NSLocale currentLocale]];
@@ -252,8 +266,17 @@ RCT_EXPORT_MODULE(RNDeviceInfo)
              @"isEmulator": @(self.isEmulator),
              @"isTablet": @(self.isTablet),
              @"is24Hour": @(self.is24Hour),
+<<<<<<< HEAD
              @"fontScale": self.fontScale,
+=======
+<<<<<<< HEAD
+>>>>>>> initial-size
              @"totalMemory": @(self.totalMemory)
+=======
+             @"fontScale": self.fontScale,
+             @"width": @(self.width),
+             @"height": @(self.height)
+>>>>>>> Adding getters for initial width and height
              };
 }
 
