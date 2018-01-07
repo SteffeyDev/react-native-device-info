@@ -266,17 +266,11 @@ RCT_EXPORT_MODULE(RNDeviceInfo)
              @"isEmulator": @(self.isEmulator),
              @"isTablet": @(self.isTablet),
              @"is24Hour": @(self.is24Hour),
-<<<<<<< HEAD
              @"fontScale": self.fontScale,
-=======
-<<<<<<< HEAD
->>>>>>> initial-size
-             @"totalMemory": @(self.totalMemory)
-=======
+             @"totalMemory": @(self.totalMemory),
              @"fontScale": self.fontScale,
              @"width": @(self.width),
              @"height": @(self.height)
->>>>>>> Adding getters for initial width and height
              };
 }
 

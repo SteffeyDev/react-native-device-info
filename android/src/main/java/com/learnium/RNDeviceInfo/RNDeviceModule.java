@@ -195,16 +195,9 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
     constants.put("timezone", TimeZone.getDefault().getID());
     constants.put("isEmulator", this.isEmulator());
     constants.put("isTablet", this.isTablet());
-<<<<<<< HEAD
-    constants.put("fontScale", this.fontScale());
-=======
-<<<<<<< HEAD
-=======
     constants.put("fontScale", this.fontScale());
     constants.put("width", this.width());
     constants.put("height", this.height());
->>>>>>> Adding getters for initial width and height
->>>>>>> initial-size
     constants.put("is24Hour", this.is24Hour());
     if (getCurrentActivity() != null &&
           (getCurrentActivity().checkCallingOrSelfPermission(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED ||
